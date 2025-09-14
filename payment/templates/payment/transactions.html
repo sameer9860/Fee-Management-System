@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}
+Fee Due
+{% endblock title %}
+
+{% block sidebar %}
+{% endblock sidebar %}
+
+{% block content %}
+<main class="min-h-screen w-full flex flex-col items-center p-8 bg-base-100">
+    <div class="flex gap-6">
+
+        <h1 class="text-3xl font-bold  mb-6 text-center">
+            💰 Transactions
+        </h1>
+        <a href="{% url 'app:student_page' %}" class="btn btn-sm btn-primary">Home</a>
+    </div>
+    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+        <table class="table w-full">
+            <!-- head -->
+            <thead>
+                <tr>
+                    <th>SN</th>
+                    <th>Name</th>
+                    <th>Amount (Rs.)</th>
+
+                    <th>Student</th>
+                    <th>Status</th>
+
+                    <th>Payment Completed At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                    <th>{{ forloop.counter }}</th>
+                    <td>{{ transaction.name }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.student.get_full_name }}</td>
+                    <td class="{% if transaction.status != 'SUCCESS' %} line-through {% endif %} ">
+                        {{ transaction.status}}</td>
+                    <td>{{ transaction.updated_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+{% endblock %}

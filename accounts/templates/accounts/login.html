@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+{% endblock %}
+
+{% block content %}
+<div class="w-full flex justify-center align-center p-4">
+
+    <!-- Messages -->
+    <div class="toast toast-end toast-top">
+        {% for message in messages %}
+        <div class="alert alert-error alert-soft">
+            <span>{{message}}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Login Form -->
+    <form class="w-1/2 max-w-md flex flex-col p-4 border border-base-300 rounded-box h-[450px] mt-[100px]"
+        method="post">
+        {% csrf_token %}
+
+        <h1 class="text-3xl font-bold mb-4">LOGIN</h1>
+
+        {% for field in form %}
+        <fieldset class="fieldset mb-4 relative">
+            <legend class="fieldset-legend">{{field.label}}</legend>
+
+            {% if field.field.widget.input_type == "password" %}
+            <div class="relative">
+                {{ field }}
+
+                <!-- Eye toggle button -->
+                <button type="button"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 toggle-password">
+                    
+                    <!-- Eye (show password) - hidden by default -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor"
+                        class="w-5 h-5 eye-icon hidden">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.25 12s3.75-7.5 9.75-7.5S21.75 12 21.75 12s-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+
+                    <!-- Eye-off (hide password) - shown initially -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor"
+                        class="w-5 h-5 eye-off-icon">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.98 8.223A10.477 10.477 0 0 0 1.5 12s3.75 7.5 10.5 7.5a10.477 10.477 0 0 0 4.113-.823M21 21 3 3" />
+                    </svg>
+                </button>
+            </div>
+            {% else %}
+                {{ field }}
+            {% endif %}
+
+            {{field.errors}}
+        </fieldset>
+        {% endfor %}
+
+        <button class="btn btn-primary" type="submit">Login</button>
+        <a href="{% url 'accounts:school_admin_register' %}" class="mt-4 text-sm text-blue-500">
+            Not a member? Click here to register
+        </a>
+        <a href="{% url 'accounts:forgot_password' %}" class="mt-4 text-sm text-blue-500">
+            Forgot Password?
+        </a>
+    </form>
+</div>
+
+<!-- Password toggle + padding fix -->
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Add right padding to all password inputs so text never overlaps the icon
+        document.querySelectorAll("input[type='password']").forEach(input => {
+            input.classList.add("pr-10");
+        });
+
+        // Toggle password visibility
+        document.querySelectorAll(".toggle-password").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const input = btn.parentElement.querySelector("input");
+                const eye = btn.querySelector(".eye-icon");
+                const eyeOff = btn.querySelector(".eye-off-icon");
+
+                if (input.type === "password") {
+                    input.type = "text";       // Show password
+                    eye.classList.remove("hidden");
+                    eyeOff.classList.add("hidden");
+                } else {
+                    input.type = "password";   // Hide password
+                    eye.classList.add("hidden");
+                    eyeOff.classList.remove("hidden");
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

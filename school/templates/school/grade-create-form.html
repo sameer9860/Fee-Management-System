@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load form_extras %}
+
+
+{% block title %}
+Class
+{% endblock title %}
+
+{% block content %}
+
+<main class=" min-h-screen flex flex-col  gap-5 p-6 w-full" id="main">
+
+    <div class="toast toast-end toast-top">
+        {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+        <div class="alert alert-error alert-soft">
+            {% else %}
+            <div class="alert alert-success alert-soft">
+                {% endif %}
+                <span>{{message}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <h1 class="text-3xl font-bold mb-4">Add Grades</h1>
+        <div class="flex  gap-12">
+            <form id="add-class-form" action="" method="post" class="flex-grow max-w-[500px]">
+                {% csrf_token %}
+                <fieldset class="fieldset mb-1">
+                    <label class="label text-xl" for="{{ form.name.id_for_label }}">{{form.name.label}}</label>
+                    {{ form.name|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                    <ul>
+                        {% for error in form.name.errors %}
+                        <li class="text-red-500 text-sm">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Add Class</button>
+            </form>
+            <div class="flex-grow">
+                <h1 class="text-2xl font-bold mb-4">Grades List</h1>
+                <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                    <table class="table">
+                        <!-- head -->
+                        <thead>
+                            <tr>
+                                <th>SN</th>
+                                <th>Grade Name</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grade-list">
+
+                            {% for grade in grades_list %}
+                            <!-- row -->
+                            <tr id="grade-{{grade.id}}">
+                                <th>{{ forloop.counter }}</th>
+                                <td>{{ grade.name }}</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <a href="{% url 'school:grade_update' grade.id %}"
+                                            class="btn btn-sm btn-primary">Update</a>
+
+                                        <form action="{% url 'school:fee' %}">
+                                            <input type="hidden" name="grade_id" value="{{grade.id}}">
+                                            <button class="btn btn-sm btn-primary">Config
+                                                Fees</button>
+                                        </form>
+
+                                        <button data-grade-id="{{grade.id}}" class="btn btn-sm btn-error"
+                                            onclick="delete_grade(this)">Delete</button>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+</main>
+
+<script>
+
+    function remove_grade_from_table(grade_id) {
+        const row_id_to_be_deleted = `grade-${grade_id}`
+        const row_to_be_deleted = document.getElementById(row_id_to_be_deleted)
+        row_to_be_deleted.remove()
+
+    }
+
+    function delete_grade(btnElement) {
+        const grade_id = btnElement.dataset.gradeId
+
+        fetch("{% url 'school:grade_delete' 'dummy' %}".replace('dummy', grade_id))
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    show_toast_message(data.message, success = true)
+                    remove_grade_from_table(grade_id)
+                } else {
+                    show_toast_message(`Error: ${data.message}`, success = false)
+                }
+            })
+            .catch((err) => console.error(err));
+
+    }
+
+    function show_toast_message(message, success = true) {
+        const mainDiv = document.getElementById("main")
+        const toastDiv = document.getElementById("toast-message")
+
+        toastDiv?.remove()
+
+        mainDiv.insertAdjacentHTML("afterbegin", `    
+            <div class="toast toast-end toast-top" id="toast-message">
+                <div class="alert alert-${success === true ? "success" : "error"} alert-soft">
+                    <span>${message}</span>
+                </div>
+            </div>
+        `)
+    }
+
+    function add_grade_to_table(grade) {
+        const table_body = document.getElementById("grade-list");
+        const rows_count = table_body.children.length
+        const table_row = document.createElement("tr")
+        table_row.id = `grade-${grade.id}`
+        const dummy_url = "{% url 'school:grade_update' 'dummy' %}";
+
+        table_row.innerHTML = `
+                            <th>${rows_count + 1}</th>
+                            <td>${grade.name}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                    <a href="${dummy_url.replace('dummy', grade.id)}" class="btn btn-sm btn-primary">Update</a>
+                                       <form action="{% url 'school:fee' %}">
+                                            <input type="hidden" name="grade_id" value="${grade.id}">
+                                            <button class="btn btn-sm btn-primary">Config
+                                                Fees</button>
+                                        </form>
+                                    <button data-grade-id="${grade.id}" class="btn btn-sm btn-error"
+                                        onclick="delete_grade(this)">Delete</button>
+
+                                </div>    
+                            </td>
+            `
+
+        table_body.appendChild(table_row)
+
+    }
+
+
+    document
+        .getElementById("add-class-form")
+        .addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent the form from submitting normally, which would cause a page reload
+
+            const formData = new FormData(this); // this means, current target html element,which is in this case is our add-class-form
+
+            const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+
+
+            fetch("{% url 'school:grade' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": csrf_token },
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        show_toast_message(data.message, success = true)
+                        add_grade_to_table(data.data)
+                    } else {
+                        show_toast_message(`Error: ${data.message}`, success = false)
+                    }
+                })
+                .catch((err) => console.error(err));
+        });
+
+</script>
+
+{% endblock content %}

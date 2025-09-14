@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load form_extras %}
+
+
+{% block title %}
+Fee
+{% endblock title %}
+
+{% block content %}
+
+<main class=" min-h-screen flex flex-col  gap-5 p-6 w-full" id="main">
+
+    <div class="toast toast-end toast-top">
+        {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+        <div class="alert alert-error alert-soft">
+            {% else %}
+            <div class="alert alert-success alert-soft">
+                {% endif %}
+                <span>{{message}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <h1 class="text-3xl font-bold mb-4">Add Fee ({{grade.name}})</h1>
+        <div class="flex  gap-12">
+            <form id="add-fee-form" action="" method="post" class="flex-grow max-w-[500px]">
+                {% csrf_token %}
+                <input type="hidden" name="grade_id" value="{{grade.id}}">
+                <fieldset class="fieldset mb-1">
+                    <label class="label text-xl" for="{{ form.name.id_for_label }}">Fee {{form.name.label}}</label>
+                    {{ form.name|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                    <ul>
+                        {% for error in form.name.errors %}
+                        <li class="text-red-500 text-sm">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+
+                </fieldset>
+                <fieldset class="fieldset mb-1">
+                    <label class="label text-xl" for="{{ form.amount.id_for_label }}">{{form.amount.label}}</label>
+                    {{ form.amount|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                    <ul>
+                        {% for error in form.amount.errors %}
+                        <li class="text-red-500 text-sm">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Add Fee</button>
+            </form>
+            <div class="flex-grow">
+                <h1 class="text-2xl font-bold mb-4">Fees List ({{grade.name}}) </h1>
+                <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                    <table class="table">
+                        <!-- head -->
+                        <thead>
+                            <tr>
+                                <th>SN</th>
+                                <th>Fee Name</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fee-list">
+
+                            {% for fee in fees %}
+                            <tr id="fee-{{fee.id}}">
+                                <th>{{ forloop.counter }}</th>
+                                <td>{{ fee.name }}</td>
+                                <td>{{ fee.amount }}</td>
+                                <td>
+                                    <div class="flex gap-2">
+                                        <a href="{% url 'school:fee_update' fee.id %}"
+                                            class="btn btn-sm btn-primary">Update</a>
+
+                                        <button data-fee-id="{{fee.id}}" class="btn btn-sm btn-error"
+                                            onclick="delete_fee(this)">Delete</button>
+                                    </div>
+
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+</main>
+
+<script>
+
+    function remove_fee_from_table(fee_id) {
+        const row_id_to_be_deleted = `fee-${fee_id}`
+        const row_to_be_deleted = document.getElementById(row_id_to_be_deleted)
+        row_to_be_deleted.remove()
+
+    }
+
+    function delete_fee(btnElement) {
+        const fee_id = btnElement.dataset.feeId
+
+        fetch("{% url 'school:fee_delete' 'dummy' %}".replace('dummy', fee_id))
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    show_toast_message(data.message, success = true)
+                    remove_fee_from_table(fee_id)
+                } else {
+                    show_toast_message(`Error: ${data.message}`, success = false)
+                }
+            })
+            .catch((err) => console.error(err));
+
+    }
+
+    function show_toast_message(message, success = true) {
+        const mainDiv = document.getElementById("main")
+        const toastDiv = document.getElementById("toast-message")
+
+        toastDiv?.remove()
+
+        mainDiv.insertAdjacentHTML("afterbegin", `    
+            <div class="toast toast-end toast-top" id="toast-message">
+                <div class="alert alert-${success === true ? "success" : "error"} alert-soft">
+                    <span>${message}</span>
+                </div>
+            </div>
+        `)
+    }
+
+    function add_fee_to_table(fee) {
+        const table_body = document.getElementById("fee-list");
+        const rows_count = table_body.children.length
+        const table_row = document.createElement("tr")
+        table_row.id = `fee-${fee.id}`
+        const dummy_url = "{% url 'school:fee_update' 'dummy' %}";
+
+
+        table_row.innerHTML = `
+                            <th>${rows_count + 1}</th>
+                            <td>${fee.name}</td>
+                            <td>${fee.name}</td>
+                            <td>
+                                <div class="flex gap-2">
+                                     <a href="${dummy_url.replace('dummy', fee.id)}"
+                                            class="btn btn-sm btn-primary">Update</a>
+
+                                        <button data-fee-id="${fee.id}" class="btn btn-sm btn-error"
+                                            onclick="delete_fee(this)">Delete</button>
+
+                                </div>    
+                            </td>
+            `
+
+        table_body.appendChild(table_row)
+
+    }
+
+
+    document
+        .getElementById("add-fee-form")
+        .addEventListener("submit", function (e) {
+            e.preventDefault(); // Prevent the form from submitting normally, which would cause a page reload
+
+            const formData = new FormData(this); // this means, current target html element,which is in this case is our add-fee-form
+
+            const csrf_token = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+
+            fetch("{% url 'school:fee' %}", {
+                method: "POST",
+                headers: { "X-CSRFToken": csrf_token },
+                body: formData,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        show_toast_message(data.message, success = true)
+                        add_fee_to_table(data.data)
+                    } else {
+                        show_toast_message(`Error: ${data.message}`, success = false)
+                    }
+                })
+                .catch((err) => console.error(err));
+        });
+
+</script>
+
+{% endblock content %}

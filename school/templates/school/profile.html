@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load text_extras %}
+
+
+{% block title %}
+Profile
+{% endblock title %}
+
+{% block content %}
+
+<main class=" min-h-screen flex  justify-center gap-5 p-6 w-full">
+
+    <div class="w-full max-w-5xl shadow-light shadow-lg rounded-xl ">
+        <!-- Banner -->
+        <div class="relative h-48 ">
+
+            {% if school.banner_image %}
+            <img src="{{school.banner_image.url}}" alt="Banner" class="w-full h-full object-cover">
+            {% else %}
+            <div class="w-full h-full" style="background-color: {{school.theme_color}};">
+
+            </div>
+            {% endif %}
+
+            <div class="absolute -bottom-16 left-8">
+                {% if school.logo %}
+                <img src="{{school.logo.url}}" alt="Logo"
+                    class="w-32 h-32 object-cover rounded-full border-4 border-white shadow-lg">
+                {% else %}
+                <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg text-center flex items-center justify-center text-white text-3xl font-bold"
+                    style="background-color: {{school.theme_color}};">
+                    {{ school.code|only_school_name }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="p-8 pt-20">
+
+            <!-- School Information -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-base-500 mb-4 border-b pb-2">School Information</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-500 text-sm">Name</label>
+                        <p class="font-semibold">{{school.name}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Established Date</label>
+                        <p class="font-semibold">{{school.established_date}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Theme Color</label>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-full border"
+                                style="background-color: {{school.theme_color}};"></span>
+                            <span>{{school.theme_color}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-base-500 mb-4 border-b pb-2">Contact Information</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-500 text-sm">Email</label>
+                        <p class="font-semibold">{{school.email}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Phone</label>
+                        <p class="font-semibold">{{school.phone}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Website</label>
+                        <a href="{{school.website}}"
+                            class="font-semibold text-blue-600 hover:underline">{{school.website}}</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div>
+                <h2 class="text-xl font-bold text-base-500 mb-4 border-b pb-2">Address Information</h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-gray-500 text-sm">Address Line 1</label>
+                        <p class="font-semibold">{{school.address_line1}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Address Line 2</label>
+                        <p class="font-semibold">{{school.address_line2}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">City</label>
+                        <p class="font-semibold">{{school.city}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">State</label>
+                        <p class="font-semibold">{{school.state}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Country</label>
+                        <p class="font-semibold">{{school.country}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Postal Code</label>
+                        <p class="font-semibold">{{school.postal_code}}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-500 text-sm">Principal Name</label>
+                        <p class="font-semibold">{{school.principal_name}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Registration Number</label>
+                        <p class="font-semibold">{{school.registration_number}}</p>
+                    </div>
+                    <div>
+                        <label class="block text-gray-500 text-sm">Map Location</label>
+
+                        <a target="_blank" href="{{school.map_location_url}}" class="font-semibold">Click
+                            here
+                            to open the map</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <a class="btn btn-primary w-full" href="{% url 'school:school_update' %}">Update School Information</a>
+
+    </div>
+    <div class="flex flex-col gap-6">
+        <div class=" h-fit rounded-xl shadow-lg overflow-hidden">
+            <div class="flex items-center p-4">
+                <img src="{{admin.profile_pic.url}}" alt="User Profile"
+                    class="w-16 h-16 rounded-full object-cover border-2 border-blue-500">
+                <div class="ml-4">
+                    <h3 class="text-lg font-bold text-base-500">{{admin.get_full_name}}</h3>
+                    <p class="text-sm text-gray-500">Administrator</p>
+                    <p class="text-sm text-gray-600 mt-1">{{admin.email}}</p>
+                </div>
+            </div>
+            <div class="px-4 pb-4">
+                <a class="btn btn-outline btn-sm w-full mb-3" href="{% url 'accounts:logout_view' %}">
+                    Logout
+                </a>
+            </div>
+        </div>
+        <div class=" h-fit rounded-xl shadow-lg overflow-hidden">
+            <div class="flex flex-col items-center p-4">
+
+                <h3 class="text-lg font-bold text-base-500 mb-8">School Configuration</h3>
+                <hr>
+
+                <a class="btn btn-outline btn-sm w-full mb-3" href="{% url 'school:grade' %}">
+                    Configure Classes
+                </a>
+                <a class="btn btn-outline btn-sm w-full mb-3" href="{% url 'accounts:logout_view' %}">
+                    Configure Fees
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+</main>
+{% endblock content %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load form_extras %}
+
+
+{% block title %}
+Class Update
+{% endblock title %}
+
+{% block content %}
+
+<main class=" min-h-screen flex flex-col  gap-5 p-6 w-full" id="main">
+    <h1 class="text-3xl font-bold mb-4">Update Grade</h1>
+    <div class="flex  gap-12">
+        <form action="" method="post" class="flex-grow max-w-[500px]">
+            {% csrf_token %}
+            <fieldset class="fieldset mb-1">
+                <label class="label text-xl" for="{{ form.name.id_for_label }}">{{form.name.label}}</label>
+                {{ form.name|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                <ul>
+                    {% for error in form.name.errors %}
+                    <li class="text-red-500 text-sm">{{ error }}</li>
+                    {% endfor %}
+                </ul>
+
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Update Class</button>
+        </form>
+
+    </div>
+</main>
+
+{% endblock content %}

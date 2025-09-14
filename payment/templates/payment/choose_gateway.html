@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{%load static%}
+{% block sidebar %}{% endblock %}
+{% block title %}Choose Payment Gateway{% endblock %}
+
+{% block content %}
+<main class="min-h-screen w-full flex flex-col items-center p-8 bg-base-100">
+  <div class="w-full max-w-lg shadow-xl rounded-3xl p-10 bg-white text-center">
+    <h1 class="text-3xl font-extrabold mb-8 text-gray-800">💳 Choose Payment Gateway</h1>
+    <p class="mb-8 text-lg text-gray-600">Amount to Pay: <strong class="text-gray-800">Rs. {{ payment.amount }}</strong></p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+      <!-- Khalti Card -->
+      <form action="{% url 'payment:payment_khalti' %}" method="post" class="flex flex-col items-center">
+        {% csrf_token %}
+        <input type="hidden" name="payment_id" value="{{ payment.id }}">
+        <button type="submit" 
+                class="w-full flex flex-col items-center justify-center gap-4 p-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl shadow-md transform hover:scale-105 transition duration-300">
+          <img src="{% static 'images/khalti-logo.png' %}" alt="Khalti" class="w-20 h-20"/>
+          <span class="text-xl mt-2">Pay with Khalti</span>
+        </button>
+      </form>
+
+      <!-- eSewa Card -->
+      <form action="{% url 'payment:payment_esewa' %}" method="post" class="flex flex-col items-center">
+        {% csrf_token %}
+        <input type="hidden" name="payment_id" value="{{ payment.id }}">
+        <button type="submit" 
+                class="w-full flex flex-col items-center justify-center gap-4 p-6 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-2xl shadow-md transform hover:scale-105 transition duration-300">
+          <img src="{% static 'images/esewa-logo.png' %}" alt="eSewa" class="w-20 h-20"/>
+          <span class="text-xl mt-2">Pay with eSewa</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+</main>
+{% endblock %}

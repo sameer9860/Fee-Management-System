@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load form_extras %}
+
+
+{% block title %}
+Fee Update
+{% endblock title %}
+
+{% block content %}
+
+<main class=" min-h-screen flex flex-col  gap-5 p-6 w-full" id="main">
+
+    <div class="toast toast-end toast-top">
+        {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+        <div class="alert alert-error alert-soft">
+            {% else %}
+            <div class="alert alert-success alert-soft">
+                {% endif %}
+                <span>{{message}}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+        <h1 class="text-3xl font-bold mb-4">Update Fee</h1>
+        <div class="flex  gap-12">
+            <form id="add-fee-form" action="" method="post" class="flex-grow max-w-[500px]">
+                {% csrf_token %}
+                <input type="hidden" name="grade_id" value="{{grade.id}}">
+                <fieldset class="fieldset mb-1">
+                    <label class="label text-xl" for="{{ form.name.id_for_label }}">Fee {{form.name.label}}</label>
+                    {{ form.name|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                    <ul>
+                        {% for error in form.name.errors %}
+                        <li class="text-red-500 text-sm">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+
+                </fieldset>
+                <fieldset class="fieldset mb-1">
+                    <label class="label text-xl" for="{{ form.amount.id_for_label }}">{{form.amount.label}}</label>
+                    {{ form.amount|add_class:"input p-3 mb-1 min-w-[300px] w-full" }}
+
+                    <ul>
+                        {% for error in form.amount.errors %}
+                        <li class="text-red-500 text-sm">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Update Fee</button>
+            </form>
+
+        </div>
+</main>
+
+{% endblock content %}

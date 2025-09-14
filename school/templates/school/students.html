@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load form_extras %}
+
+{% block title %}
+Students
+{% endblock title %}
+
+{% block content %}
+<main class="min-h-screen flex flex-col p-6 w-full">
+
+    <!-- Page Title -->
+    <h1 class="text-2xl font-bold mb-3">Student Management</h1>
+
+    <div class="flex  gap-8">
+
+        <!-- Left Section -->
+        <div class=" flex flex-col flex-grow max-w-[500px] max-h-[90vh] overflow-y-auto">
+
+            <!-- Student Registration Form -->
+            <div class=" shadow rounded-2xl p-6 ">
+                <h2 class="text-xl font-semibold mb-4">Register a Student</h2>
+                <form method="post" enctype="multipart/form-data" class="">
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <fieldset class="fieldset mb-2">
+                        <legend class="fieldset-legend text-sm font-medium ">
+                            {{ field.label }}
+                        </legend>
+                        {{ field|add_class:"input input-bordered w-full" }}
+                        {% if field.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                        {% endif %}
+                    </fieldset>
+                    {% endfor %}
+
+                    <button type="submit" class="w-full btn btn-primary">
+                        Register Student
+                    </button>
+                </form>
+
+            </div>
+
+            <!-- CSV Upload Form -->
+            <div class=" shadow rounded-2xl p-6">
+                <h2 class="text-xl font-semibold mb-4">Bulk Upload Students (CSV)</h2>
+                <form method="post" enctype="multipart/form-data" action="{% url 'school:upload_students_csv' %}">
+                    {% csrf_token %}
+                    <fieldset class="fieldset mb-2">
+
+                        {{ csv_form.grade|add_class:"select input input-bordered w-full" }}
+                        {% if csv_form.grade.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ csv_form.grade.errors|striptags }}</p>
+                        {% endif %}
+                    </fieldset>
+                    <fieldset class="fieldset mb-2">
+
+                        {{ csv_form.csv_file|add_class:"file-input input-bordered w-full" }}
+                        {% if csv_form.csv_file.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ csv_form.csv_file.errors|striptags }}</p>
+                        {% endif %}
+                    </fieldset>
+
+                    <button type="submit" class="w-full btn btn-primary">
+                        Upload CSV
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Section (Student List) -->
+        <div class=" flex-grow  shadow rounded-2xl p-6">
+            <form action="" method="get" class="flex gap-2 items-baseline">
+                {% for field in filter_form %}
+                <fieldset class="fieldset mb-2">
+                    <legend class="fieldset-legend text-sm font-medium ">
+                        {{ field.label }}
+                    </legend>
+                    {{ field|add_class:"input input-bordered input-sm" }}
+                    {% if field.errors %}
+                    <p class="text-red-500 text-sm mt-1">{{ field.errors|striptags }}</p>
+                    {% endif %}
+                </fieldset>
+                {% endfor %}
+
+                <button type="submit" class=" btn btn-sm btn-primary">
+                    Filter
+                </button>
+                <button class="btn btn-sm btn-error" type="reset">Reset</button>
+            </form>
+
+            <h2 class="text-xl font-semibold mb-4">Students List</h2>
+            <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                <table class="table">
+                    <!-- head -->
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>Name</th>
+                            <th>Address</th>
+                            <th>Grade</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="student-list">
+
+                        {% for student in page_obj %}
+                        <!-- row -->
+                        <tr id="">
+                            <th>{{ forloop.counter }}</th>
+                            <td>{{ student.get_full_name }}</td>
+                            <td>{{ student.address }}</td>
+                            <td>{{ student.grade.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.phone_number|default:'-' }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <!-- Profile -->
+                                    <a href="#" class="text-primary" title="Profile">
+                                        <i class="bi bi-person-fill"></i>
+                                    </a>
+                            
+                                    <!-- Edit -->
+                                    <a href="#" class="text-warning" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                            
+                                    <!-- Delete -->
+                                    <a href="#" class="text-danger" title="Delete">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+
+
+
+                    </tbody>
+
+                </table>
+                <div class="join flex justify-end">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="join-item btn">First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn">«</a>
+                    {% endif %}
+                    <a class="join-item btn">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="join-item btn">»</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="join-item btn">Last</a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

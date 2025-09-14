@@ -1,0 +1,15 @@
+<form action="{{ esewa_url }}" method="POST" id="esewaForm">
+    <input type="hidden" name="tAmt" value="{{ payment.amount }}">   <!-- total amount -->
+    <input type="hidden" name="amt" value="{{ payment.amount }}">    <!-- actual amount -->
+    <input type="hidden" name="txAmt" value="0">                     <!-- tax amount -->
+    <input type="hidden" name="psc" value="0">                       <!-- service charge -->
+    <input type="hidden" name="pdc" value="0">                       <!-- delivery charge -->
+    <input type="hidden" name="scd" value="{{ merchant_code }}">     <!-- merchant code -->
+    <input type="hidden" name="pid" value="{{ payment.id }}">        <!-- unique payment ID -->
+    <input type="hidden" name="su" value="{{ success_url }}">        <!-- success URL -->
+    <input type="hidden" name="fu" value="{{ failure_url }}">        <!-- failure URL -->
+</form>
+
+<script>
+  document.getElementById("esewaForm").submit();
+</script>

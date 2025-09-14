@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+
+{% if request.user.school %}
+<!-- Main content -->
+<main class="flex-grow p-6 overflow-auto">
+
+
+    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-lg font-semibold mb-2">Total Students</h2>
+            <p class="text-3xl font-bold text-primary">1,250</p>
+        </div>
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-lg font-semibold mb-2">Total Payments</h2>
+            <p class="text-3xl font-bold text-green-600">Rs. 7,50,000</p>
+        </div>
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-lg font-semibold mb-2">Pending Payments</h2>
+            <p class="text-3xl font-bold text-red-600">Rs. 1,20,000</p>
+        </div>
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-lg font-semibold mb-2">Active Classes</h2>
+            <p class="text-3xl font-bold text-secondary">12</p>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Payments Bar Chart -->
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-xl font-semibold mb-4">Monthly Payments</h2>
+            <canvas id="paymentsBarChart" width="400" height="250"></canvas>
+        </div>
+
+        <!-- Fees Distribution Pie Chart -->
+        <div class="card bg-base-100 shadow p-4">
+            <h2 class="text-xl font-semibold mb-4">Fees Distribution</h2>
+            <canvas id="feesPieChart" width="400" height="250"></canvas>
+        </div>
+    </div>
+</main>
+
+<!-- Chart.js Script -->
+<script>
+    // Monthly Payments Bar Chart
+    const paymentsCtx = document.getElementById('paymentsBarChart').getContext('2d');
+    const paymentsBarChart = new Chart(paymentsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+            datasets: [{
+                label: 'Payments Received (₹)',
+                data: [90000, 85000, 72000, 95000, 87000, 92000, 88000],
+                backgroundColor: '#22c55e' // Tailwind green-500
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Fees Distribution Pie Chart
+    const feesCtx = document.getElementById('feesPieChart').getContext('2d');
+    const feesPieChart = new Chart(feesCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Tuition Fees', 'Lab Fees', 'Library Fees', 'Sports Fees'],
+            datasets: [{
+                label: 'Fees',
+                data: [55, 15, 20, 10],
+                backgroundColor: [
+                    '#3b82f6',  // blue-500
+                    '#ef4444',  // red-500
+                    '#fbbf24',  // yellow-400
+                    '#8b5cf6'   // purple-500
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+        }
+    });
+</script>
+{% else %}
+{% include 'school/registration-form.html' with form=form %}
+{% endif %}
+{% endblock content %}
