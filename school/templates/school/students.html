@@ -6,6 +6,8 @@ Students
 {% endblock title %}
 
 {% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 <main class="min-h-screen flex flex-col p-6 w-full">
 
     <!-- Page Title -->
@@ -117,20 +119,20 @@ Students
                             <td>{{ student.email }}</td>
                             <td>{{ student.phone_number|default:'-' }}</td>
                             <td>
-                                <div class="d-flex gap-2">
+                                <div class="flex gap-3">
                                     <!-- Profile -->
-                                    <a href="#" class="text-primary" title="Profile">
-                                        <i class="bi bi-person-fill"></i>
+                                    <a href="#" class="text-blue-500 hover:text-blue-700" title="Profile">
+                                        <i class="bi bi-person-circle text-xl"></i>
                                     </a>
                             
                                     <!-- Edit -->
-                                    <a href="#" class="text-warning" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+                                    <a href="#" class="text-yellow-500 hover:text-yellow-700" title="Edit">
+                                        <i class="bi bi-pencil-square text-xl"></i>
                                     </a>
                             
                                     <!-- Delete -->
-                                    <a href="#" class="text-danger" title="Delete">
-                                        <i class="bi bi-trash-fill"></i>
+                                    <a href="#" class="text-red-500 hover:text-red-700" title="Delete">
+                                        <i class="bi bi-trash-fill text-xl"></i>
                                     </a>
                                 </div>
                             </td>
