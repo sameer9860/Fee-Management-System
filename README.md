@@ -1,4 +1,4 @@
-# 🚀 Lead Management System - Installation Guide
+# 🚀 Fee Management System - Installation Guide
 
 # 1. Clone the Repository
 git clone https://github.com/sameer9860/Fee-Management-System.git
@@ -38,3 +38,4 @@ python manage.py tailwind dev
 # 10. Access the Application
 # Open your browser and go to:
 # http://127.0.0.1:8000
+
