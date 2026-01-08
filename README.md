@@ -38,3 +38,5 @@ python manage.py tailwind dev
 # 10. Access the Application
 # Open your browser and go to:
 # http://127.0.0.1:8000
+
+![Fee Management System](theme/static/images/fmsfinal.png)
