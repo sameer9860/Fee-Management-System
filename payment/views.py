@@ -13,10 +13,25 @@ from django.shortcuts import get_object_or_404
 
 def transactions(request):
     transactions = request.user.payments.all().order_by("-updated_at")
+    total_paid = transactions.filter(status=Payment.Status.SUCCESS).aggregate(total=models.Sum("amount"))["total"] or 0
+    pending_count = transactions.filter(status=Payment.Status.PENDING).count()
+    failed_count = transactions.filter(status=Payment.Status.FAILED).count()
+    # calculate due based on grade total (if available)
+    try:
+        grade_total = Grade.get_total_fees(request.user.grade)["grand_total"]
+    except Exception:
+        grade_total = 0
+    due_fee = max(0, grade_total - total_paid)
 
-    context = {"transactions": transactions}
+    context = {
+        "transactions": transactions,
+        "total_paid": total_paid,
+        "pending_count": pending_count,
+        "failed_count": failed_count,
+        "due_fee": due_fee,
+    }
 
-    return render(request, "payment/transactions.html", context)
+    return render(request, "payment/transactions.html", context) 
 
 
 def due_payments(request):
@@ -35,7 +50,12 @@ def due_payments(request):
         "due_fee": due_fee,
     }
 
-    return render(request, "payment/due-payments.html", context)
+    # try to render improved template, fallback to original if not present
+    from django.template import TemplateDoesNotExist
+    try:
+        return render(request, "payment/due-payments-v2.html", context)
+    except TemplateDoesNotExist:
+        return render(request, "payment/due-payments.html", context)
 
 
 @require_POST

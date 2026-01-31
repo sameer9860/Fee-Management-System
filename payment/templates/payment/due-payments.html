@@ -18,27 +18,50 @@ Fee Due
     </div>
 
     <div class="w-full flex flex-col items-center max-w-3xl shadow-lg rounded-2xl p-8">
-        <h1 class="text-3xl font-bold mb-6 text-center">
-            💰 Fee Due: Rs. {{ due_fee }}
-        </h1>
-
-
-        <p class="text-md font-semibold mb-6 ">Total Fee: Rs. {{ grade_fee }}</p>
-
-
-        <form action="{% url 'payment:payment' %}" method="post" class="flex gap-2 items-baseline">
-            {% csrf_token %}
-            <fieldset class="fieldset mb-4">
-                <legend class="fieldset-legend text-xl">Amount in Rs.</legend>
-                <input type="number" name="amount" id="amount" value="{{ due_fee }}" class="input input-bordered w-full"
-                    required>
-            </fieldset>
-            <button type="submit" class="btn btn-primary">Make Payment</button>
-        </form>
-        <div
-            class="bg-base-100 rounded-xl p-6 font-mono text-md line-height-relaxed whitespace-pre-line leading-relaxed">
-            {{ fee_structure|linebreaksbr }}
+        <div class="w-full flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold">💰 Fee Due</h1>
+            <div class="text-sm text-gray-500">Total Fee: <strong>Rs. {{ grade_fee }}</strong></div>
         </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-6 w-full">
+            <div class="shadow rounded-lg p-4 bg-base-100 text-center">
+                <div class="text-sm text-gray-500">Total Fee</div>
+                <div class="text-lg font-bold">Rs. {{ grade_fee }}</div>
+            </div>
+            <div class="shadow rounded-lg p-4 bg-base-100 text-center">
+                <div class="text-sm text-gray-500">Total Paid</div>
+                <div class="text-lg font-bold">Rs. {{ total_paid }}</div>
+            </div>
+            <div class="shadow rounded-lg p-4 bg-base-100 text-center">
+                <div class="text-sm text-gray-500">Due</div>
+                <div class="text-lg font-bold">Rs. {{ due_fee }}</div>
+            </div>
+        </div>
+
+        {% if due_fee > 0 %}
+        <form action="{% url 'payment:payment' %}" method="post" class="w-full">
+            {% csrf_token %}
+            <div class="form-control w-full mb-4">
+                <label class="input-group">
+                    <span>Rs.</span>
+                    <input type="number" name="amount" id="amount" value="{{ due_fee }}" class="input input-bordered w-full" min="1" required>
+                </label>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn btn-primary">Make Payment</button>
+                <a href="{% url 'payment:transactions' %}" class="btn btn-outline">View Transactions</a>
+            </div>
+        </form>
+        {% else %}
+        <div class="alert alert-success w-full">
+            <span>You're all paid up! 🎉 No due fees at the moment.</span>
+        </div>
+        {% endif %}
+
+        <details class="mt-6 w-full bg-base-100 rounded-xl p-4">
+            <summary class="cursor-pointer font-semibold">Fee Structure & Details</summary>
+            <div class="mt-3 font-mono text-sm whitespace-pre-line">{{ fee_structure|linebreaksbr }}</div>
+        </details>
     </div>
 </main>
 {% endblock %}

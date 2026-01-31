@@ -17,6 +17,8 @@ from school.forms import (
     StudentRegistrationForm,
 )
 from school.models import Fee, Grade, TempCSVFile
+from payment.models import Payment
+from django.db import models
 from school.background_tasks import bulk_create_students_from_csv
 from school.filters import StudentFilter
 from django.core.paginator import Paginator
@@ -237,6 +239,83 @@ def students(request):
     }
 
     return render(request, "school/students.html", context)
+
+
+@login_required
+def student_profile(request, student_id):
+    try:
+        student = CustomUser.objects.get(id=student_id, role=CustomUser.Roles.STUDENT)
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Student does not exist")
+        return redirect("school:students")
+
+    # ensure student belongs to current school
+    if not student.grade or not hasattr(request.user, 'school') or student.grade.school != request.user.school:
+        messages.error(request, "Student does not belong to your school")
+        return redirect("school:students")
+
+    # payments and fee info
+    payments = student.payments.order_by("-updated_at")[:20]
+    total_paid = student.payments.filter(status=Payment.Status.SUCCESS).aggregate(total=models.Sum("amount"))["total"] or 0
+    fee_info = None
+    due_amount = None
+    if student.grade:
+        fee_info = Grade.get_total_fees(student.grade)
+        due_amount = fee_info["grand_total"] - total_paid
+
+    context = {
+        "student": student,
+        "payments": payments,
+        "total_paid": total_paid,
+        "fee_info": fee_info,
+        "due_amount": due_amount,
+    }
+    return render(request, "school/student-profile.html", context)
+
+
+@login_required
+def student_update(request, student_id):
+    try:
+        student = CustomUser.objects.get(id=student_id, role=CustomUser.Roles.STUDENT)
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Student does not exist")
+        return redirect("school:students")
+
+    if not student.grade or not hasattr(request.user, 'school') or student.grade.school != request.user.school:
+        messages.error(request, "Student does not belong to your school")
+        return redirect("school:students")
+
+    if request.method == "POST":
+        form = StudentUpdateForm(request.POST, request.FILES, instance=student, request=request)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Student updated successfully")
+            return redirect("school:student_profile", student_id=student.id)
+    else:
+        form = StudentUpdateForm(instance=student, request=request)
+
+    return render(request, "school/student-update.html", {"form": form, "student": student})
+
+
+@login_required
+def student_delete(request, student_id):
+    try:
+        student = CustomUser.objects.get(id=student_id, role=CustomUser.Roles.STUDENT)
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Student does not exist")
+        return redirect("school:students")
+
+    if not student.grade or not hasattr(request.user, 'school') or student.grade.school != request.user.school:
+        messages.error(request, "Student does not belong to your school")
+        return redirect("school:students")
+
+    # Accept POST only for delete
+    if request.method == "POST":
+        student.delete()
+        messages.success(request, "Student deleted successfully")
+        return redirect("school:students")
+
+    return render(request, "school/student-delete-confirm.html", {"student": student})
 
 
 def upload_students_csv(request):

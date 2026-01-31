@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="bg-base-200 rounded-xl shadow-md overflow-hidden">
+        <div class="h-36 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+        <div class="p-6 -mt-12 flex gap-6 items-center">
+            <div class="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-2xl overflow-hidden">
+                {% if student.profile_pic %}
+                <img src="{{ student.profile_pic.url }}" alt="{{ student.get_full_name }}" class="w-full h-full object-cover">
+                {% else %}
+                {{ student.first_name|default:student.username|slice:":1"|upper }}
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold">{{ student.get_full_name }}</h2>
+                <p class="text-sm text-gray-500">Grade: {{ student.grade.name|default:'-' }} | Email: {{ student.email }}</p>
+                <p class="text-sm text-gray-500">Phone: {{ student.phone_number|default:'-' }} | Address: {{ student.address|default:'-' }}</p>
+            </div>
+            <div class="ml-auto">
+                <a href="{% url 'school:student_update' student.id %}" class="btn btn-sm btn-outline">Edit</a>
+                <form method="post" action="{% url 'school:student_delete' student.id %}" class="inline-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-error">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <div class="p-4 bg-base-100 rounded shadow">
+            <div class="text-sm text-gray-500">Total Paid</div>
+            <div class="text-xl font-bold">Rs. {{ total_paid|floatformat:2 }}</div>
+        </div>
+        <div class="p-4 bg-base-100 rounded shadow">
+            <div class="text-sm text-gray-500">Due Amount</div>
+            <div class="text-xl font-bold text-error">Rs. {{ due_amount|default:'0.00' }}</div>
+        </div>
+        <div class="p-4 bg-base-100 rounded shadow">
+            <div class="text-sm text-gray-500">Recent Payments</div>
+            <div class="text-xl font-bold">{{ payments|length }}</div>
+        </div>
+    </div>
+
+    <div class="mt-6 bg-base-200 p-4 rounded">
+        <h3 class="mb-2 font-semibold">Payment History</h3>
+        {% if payments %}
+        <ul class="space-y-2">
+            {% for tx in payments %}
+            <li class="flex justify-between items-center p-2 bg-base-100 rounded">
+                <div>
+                    <div class="font-medium">{{ tx.name }} - Rs. {{ tx.amount }}</div>
+                    <div class="text-xs text-gray-500">{{ tx.get_status_display }} • {{ tx.gateway }} • {{ tx.updated_at|date:'M d, Y' }}</div>
+                </div>
+                <div>
+                    {% if tx.status == 'SUCCESS' %}
+                    <span class="badge badge-success">Paid</span>
+                    {% elif tx.status == 'FAILED' %}
+                    <span class="badge badge-error">Failed</span>
+                    {% else %}
+                    <span class="badge">{{ tx.status }}</span>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-gray-500">No payments for this student yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

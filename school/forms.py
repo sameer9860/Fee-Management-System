@@ -136,3 +136,30 @@ class StudentBulkRegisterForm(forms.Form):
         self.fields["grade"].queryset = Grade.objects.filter(
             school=self.request.user.school
         )
+
+
+class StudentUpdateForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = [
+            "first_name",
+            "last_name",
+            "grade",
+            "email",
+            "phone_number",
+            "address",
+            "profile_pic",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request") if "request" in kwargs else None
+        super().__init__(*args, **kwargs)
+        self.fields["grade"].queryset = Grade.objects.filter(
+            school=self.request.user.school
+        )
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+        return user

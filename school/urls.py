@@ -15,4 +15,9 @@ urlpatterns = [
     path("fee/<pk>/update/", views.fee_update, name="fee_update"),
     path("students/", views.students, name="students"),
     path("students/csv-upload/", views.upload_students_csv, name="upload_students_csv"),
+
+    # Student detail / management
+    path("student/<int:student_id>/", views.student_profile, name="student_profile"),
+    path("student/<int:student_id>/update/", views.student_update, name="student_update"),
+    path("student/<int:student_id>/delete/", views.student_delete, name="student_delete"),
 ]

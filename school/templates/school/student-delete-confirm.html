@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6 text-center">
+    <h2 class="text-2xl font-bold">Delete Student</h2>
+    <p class="mt-4">Are you sure you want to delete <strong>{{ student.get_full_name }}</strong>? This action cannot be undone.</p>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-error">Yes, Delete</button>
+        <a href="{% url 'school:student_profile' student.id %}" class="btn btn-ghost ml-2">Cancel</a>
+    </form>
+</div>
+{% endblock %}

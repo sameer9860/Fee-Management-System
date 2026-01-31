@@ -9,43 +9,74 @@ Fee Due
 
 {% block content %}
 <main class="min-h-screen w-full flex flex-col items-center p-8 bg-base-100">
-    <div class="flex gap-6">
+    <div class="w-full max-w-5xl">
+        <div class="flex items-center justify-between mb-6 gap-4">
+            <h1 class="text-3xl font-bold">💰 Transactions</h1>
+            <div class="flex gap-2">
+                <a href="{% url 'app:student_page' %}" class="btn btn-sm btn-outline">Home</a>
+                <a href="{% url 'payment:due_payments' %}" class="btn btn-sm btn-primary">Pay Due</a>
+            </div>
+        </div>
 
-        <h1 class="text-3xl font-bold  mb-6 text-center">
-            💰 Transactions
-        </h1>
-        <a href="{% url 'app:student_page' %}" class="btn btn-sm btn-primary">Home</a>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+            <div class="shadow rounded-lg p-4 bg-base-100">
+                <div class="text-sm text-gray-500">Total Paid</div>
+                <div class="text-xl font-bold">Rs. {{ total_paid }}</div>
+            </div>
+            <div class="shadow rounded-lg p-4 bg-base-100">
+                <div class="text-sm text-gray-500">Pending</div>
+                <div class="text-xl font-bold">{{ pending_count }}</div>
+            </div>
+            <div class="shadow rounded-lg p-4 bg-base-100">
+                <div class="text-sm text-gray-500">Failed</div>
+                <div class="text-xl font-bold">{{ failed_count }}</div>
+            </div>
+            <div class="shadow rounded-lg p-4 bg-base-100">
+                <div class="text-sm text-gray-500">Due</div>
+                <div class="text-xl font-bold">Rs. {{ due_fee }}</div>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+            <table class="table w-full">
+                <thead>
+                    <tr>
+                        <th>SN</th>
+                        <th class="max-w-xs">Description</th>
+                        <th>Amount</th>
+                        <th>Gateway</th>
+                        <th>Status</th>
+                        <th>Completed At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if transactions %}
+                    {% for transaction in transactions %}
+                    <tr>
+                        <th>{{ forloop.counter }}</th>
+                        <td class="max-w-xs truncate">{{ transaction.name }}</td>
+                        <td>Rs. {{ transaction.amount }}</td>
+                        <td>{{ transaction.get_gateway_display }}</td>
+                        <td>
+                            {% if transaction.status == 'SUCCESS' %}
+                            <span class="badge badge-success">Success</span>
+                            {% elif transaction.status == 'FAILED' %}
+                            <span class="badge badge-error">Failed</span>
+                            {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ transaction.updated_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-10">No transactions yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-        <table class="table w-full">
-            <!-- head -->
-            <thead>
-                <tr>
-                    <th>SN</th>
-                    <th>Name</th>
-                    <th>Amount (Rs.)</th>
-
-                    <th>Student</th>
-                    <th>Status</th>
-
-                    <th>Payment Completed At</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in transactions %}
-                <tr>
-                    <th>{{ forloop.counter }}</th>
-                    <td>{{ transaction.name }}</td>
-                    <td>{{ transaction.amount }}</td>
-                    <td>{{ transaction.student.get_full_name }}</td>
-                    <td class="{% if transaction.status != 'SUCCESS' %} line-through {% endif %} ">
-                        {{ transaction.status}}</td>
-                    <td>{{ transaction.updated_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-</main>
+</main> 
 {% endblock %}
