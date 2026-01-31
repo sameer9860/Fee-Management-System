@@ -31,5 +31,38 @@ def dashboard(request):
     return render(request, "app/dashboard.html")
 
 
+from django.db import models
+from payment.models import Payment
+from school.models import Grade
+
+
+@login_required
 def student_page(request):
-    return render(request, "app/student-page.html")
+    # Ensure only students access this page
+    if request.user.role != CustomUser.Roles.STUDENT:
+        return redirect("app:dashboard")
+
+    student = request.user
+
+    # Payments
+    recent_payments = student.payments.order_by("-updated_at")[:6]
+    total_paid = student.payments.filter(status=Payment.Status.SUCCESS).aggregate(total=models.Sum("amount"))["total"]
+    total_paid = total_paid or 0
+
+    # Fee summary for grade
+    fee_info = None
+    due_amount = None
+    if student.grade:
+        fee_info = Grade.get_total_fees(student.grade)
+        grand_total = fee_info["grand_total"]
+        due_amount = grand_total - total_paid
+
+    context = {
+        "student": student,
+        "recent_payments": recent_payments,
+        "total_paid": total_paid,
+        "fee_info": fee_info,
+        "due_amount": due_amount,
+    }
+
+    return render(request, "app/student-page.html", context)

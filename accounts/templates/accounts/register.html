@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
+{% load static %}
 
 {% block sidebar %}
 {% endblock %}
 
 
 {% block content %}
-<div class="w-full flex justify-center p-4">
+<div class="w-full min-h-screen flex items-center justify-center p-4">
 
     <div class="toast toast-end toast-top">
         {% for error in form.non_field_errors %}
@@ -15,18 +16,31 @@
         </div>
         {% endfor %}
     </div>
-    <form class="w-1/2 flex flex-col p-4 " method="post" enctype="multipart/form-data">
+    <form class="w-1/2 max-w-md flex flex-col p-6 bg-base-100 rounded-box shadow-sm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
+        <!-- <div class="text-center mb-4">
+            <img src="{% static 'images/fms logo.png' %}" alt="logo" class="w-14 h-14 mx-auto mb-2 rounded-full">
+            <h2 class="text-2xl font-bold">Create an account</h2>
+            <p class="text-sm text-gray-500">Fill in details to register</p>
+        </div> -->
         <fieldset class="fieldset bg-base-200 border-base-300 rounded-box border p-4 text-sm md:text-lg shadow-md ">
             <legend class="fieldset-legend text-2xl">Register</legend>
 
 
             {% for field in form %}
 
-
             <label class="label">{{field.label}}</label>
-            {{field}}
+                {% if field.field.widget.input_type == "password" %}
+                <div class="relative">
+                    {{ field }}
+                    <button type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 toggle-password invisible" aria-label="Toggle password visibility">
+                        <i class="fa-solid fa-eye-slash toggle-icon text-lg"></i>
+                    </button>
+                </div>
+                {% else %}
+                    {{ field }}
+                {% endif %}
 
             {% for error in field.errors %}
             <div class="text-red-600 text-sm">
@@ -36,10 +50,17 @@
 
             {% endfor %}
 
+            <!-- Password strength & match indicators -->
+            <div id="password-strength" class="mt-2 hidden">
+                <div class="h-2 bg-base-300 rounded overflow-hidden">
+                    <div id="password-strength-bar" class="h-full w-0 bg-red-500 transition-all duration-200"></div>
+                </div>
+                <p id="password-strength-text" class="text-sm mt-1"></p>
+            </div>
 
+            <p id="password-match" class="text-sm mt-2 hidden"></p>
 
-
-            <button class="btn btn-neutral mt-4">Register</button>
+            <button class="w-full btn btn-primary mt-4">Register</button>
 
 
             <a href="{% url 'accounts:school_admin_login' %}" class="mt-4 text-sm text-blue-500">

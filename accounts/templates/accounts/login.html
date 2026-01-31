@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block sidebar %}
 {% endblock %}
 
 {% block content %}
-<div class="w-full flex justify-center align-center p-4">
+<div class="w-full min-h-screen flex items-center justify-center p-4">
 
     <!-- Messages -->
     <div class="toast toast-end toast-top">
@@ -16,11 +16,15 @@
     </div>
 
     <!-- Login Form -->
-    <form class="w-1/2 max-w-md flex flex-col p-4 border border-base-300 rounded-box h-[450px] mt-[100px]"
+    <form class="w-1/2 max-w-md flex flex-col p-6 border border-base-300 rounded-box bg-base-100 shadow-sm"
         method="post">
         {% csrf_token %}
 
-        <h1 class="text-3xl font-bold mb-4">LOGIN</h1>
+        <div class="text-center mb-4">
+            <img src="{% static 'images/fms logo.png' %}" alt="logo" class="w-16 h-16 mx-auto mb-2 rounded-full">
+            <h1 class="text-2xl font-bold">Welcome back</h1>
+            <p class="text-sm text-gray-500">Sign in to continue to FMS</p>
+        </div>
 
         {% for field in form %}
         <fieldset class="fieldset mb-4 relative">
@@ -30,26 +34,11 @@
             <div class="relative">
                 {{ field }}
 
-                <!-- Eye toggle button -->
+                <!-- Eye toggle button (Font Awesome). Starts invisible; becomes visible when typing -->
                 <button type="button"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 toggle-password">
-                    
-                    <!-- Eye (show password) - hidden by default -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor"
-                        class="w-5 h-5 eye-icon hidden">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 12s3.75-7.5 9.75-7.5S21.75 12 21.75 12s-3.75 7.5-9.75 7.5S2.25 12 2.25 12z" />
-                        <circle cx="12" cy="12" r="3" />
-                    </svg>
-
-                    <!-- Eye-off (hide password) - shown initially -->
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        stroke-width="1.5" stroke="currentColor"
-                        class="w-5 h-5 eye-off-icon">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M3.98 8.223A10.477 10.477 0 0 0 1.5 12s3.75 7.5 10.5 7.5a10.477 10.477 0 0 0 4.113-.823M21 21 3 3" />
-                    </svg>
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 toggle-password invisible"
+                    aria-label="Toggle password visibility">
+                    <i class="fa-solid fa-eye-slash toggle-icon text-lg"></i>
                 </button>
             </div>
             {% else %}
@@ -60,7 +49,7 @@
         </fieldset>
         {% endfor %}
 
-        <button class="btn btn-primary" type="submit">Login</button>
+        <button class="w-full btn btn-primary" type="submit">Login</button>
         <a href="{% url 'accounts:school_admin_register' %}" class="mt-4 text-sm text-blue-500">
             Not a member? Click here to register
         </a>
@@ -69,34 +58,5 @@
         </a>
     </form>
 </div>
-
-<!-- Password toggle + padding fix -->
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Add right padding to all password inputs so text never overlaps the icon
-        document.querySelectorAll("input[type='password']").forEach(input => {
-            input.classList.add("pr-10");
-        });
-
-        // Toggle password visibility
-        document.querySelectorAll(".toggle-password").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const input = btn.parentElement.querySelector("input");
-                const eye = btn.querySelector(".eye-icon");
-                const eyeOff = btn.querySelector(".eye-off-icon");
-
-                if (input.type === "password") {
-                    input.type = "text";       // Show password
-                    eye.classList.remove("hidden");
-                    eyeOff.classList.add("hidden");
-                } else {
-                    input.type = "password";   // Hide password
-                    eye.classList.add("hidden");
-                    eyeOff.classList.remove("hidden");
-                }
-            });
-        });
-    });
-</script>
 
 {% endblock %}

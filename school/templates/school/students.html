@@ -91,54 +91,72 @@ Students
                 <button class="btn btn-sm btn-error" type="reset">Reset</button>
             </form>
 
-            <h2 class="text-xl font-semibold mb-4">Students List</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">Students List</h2>
+                <div class="text-sm text-gray-500">Total: <strong>{{ total_students }}</strong></div>
+            </div>
             <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table class="table">
+                <table class="table w-full">
                     <!-- head -->
                     <thead>
                         <tr>
                             <th>SN</th>
-                            <th>Name</th>
-                            <th>Address</th>
+                            <th>Student</th>
                             <th>Grade</th>
-                            <th>Email</th>
-                            <th>Phone</th>
+                            <th>Contact</th>
+                            <th>Address</th>
                             <th>Actions</th>
 
                         </tr>
                     </thead>
                     <tbody id="student-list">
 
+                        {% if page_obj.object_list %}
                         {% for student in page_obj %}
                         <!-- row -->
-                        <tr id="">
+                        <tr>
                             <th>{{ forloop.counter }}</th>
-                            <td>{{ student.get_full_name }}</td>
-                            <td>{{ student.address }}</td>
-                            <td>{{ student.grade.name }}</td>
-                            <td>{{ student.email }}</td>
-                            <td>{{ student.phone_number|default:'-' }}</td>
+                            <td class="flex items-center gap-3">
+                                {% if student.profile_pic %}
+                                <img src="{{ student.profile_pic.url }}" alt="avatar" class="w-10 h-10 rounded-full object-cover">
+                                {% else %}
+                                <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">{{ student.first_name|default:student.username|slice:":1"|upper }}</div>
+                                {% endif %}
+                                <div>
+                                    <div class="font-medium">{{ student.get_full_name }}</div>
+                                    <div class="text-xs text-gray-500">{{ student.email }}</div>
+                                </div>
+                            </td>
+                            <td><span class="badge badge-outline">{{ student.grade.name }}</span></td>
+                            <td>
+                                <div class="text-sm">{{ student.phone_number|default:'-' }}</div>
+                            </td>
+                            <td>{{ student.address|default:'-' }}</td>
                             <td>
                                 <div class="flex gap-3">
                                     <!-- Profile -->
-                                    <a href="#" class="text-blue-500 hover:text-blue-700" title="Profile">
+                                    <a href="{% url 'school:student_profile' student.id %}" class="text-blue-500 hover:text-blue-700" title="Profile">
                                         <i class="bi bi-person-circle text-xl"></i>
                                     </a>
-                            
+                                    
                                     <!-- Edit -->
-                                    <a href="#" class="text-yellow-500 hover:text-yellow-700" title="Edit">
+                                    <a href="{% url 'school:student_update' student.id %}" class="text-yellow-500 hover:text-yellow-700" title="Edit">
                                         <i class="bi bi-pencil-square text-xl"></i>
                                     </a>
-                            
+                                    
                                     <!-- Delete -->
-                                    <a href="#" class="text-red-500 hover:text-red-700" title="Delete">
+                                    <a href="{% url 'school:student_delete' student.id %}" class="text-red-500 hover:text-red-700" title="Delete">
                                         <i class="bi bi-trash-fill text-xl"></i>
                                     </a>
                                 </div>
                             </td>
-                            
                         </tr>
                         {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-10">No students found. Register students using the form or upload CSV.</td>
+                        </tr>
+                        {% endif %}
 
 
 

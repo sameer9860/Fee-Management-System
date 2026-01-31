@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     {% tailwind_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body class="flex h-screen bg-base-200">
@@ -62,6 +63,150 @@
             const newTheme = current === "light" ? "dark" : "light";
             html.setAttribute("data-theme", newTheme);
         }
+    </script>
+
+    <!-- Password toggler script (applies to login, register, etc.) -->
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Attach behavior to each toggle button (more robust than searching inputs)
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            // Find associated input: prefer input inside same container, fallback to closest ancestor
+            const container = btn.parentElement || btn.closest('div, label, fieldset');
+            let input = (container && container.querySelector('input[type="password"], input')) || null;
+            if (!input) {
+                // try searching siblings
+                input = btn.previousElementSibling && btn.previousElementSibling.querySelector ? btn.previousElementSibling.querySelector('input[type="password"], input') : null;
+            }
+            if (!input) return; // give up if we cannot find input
+
+            // Ensure padding so icon doesn't overlap
+            input.classList.add('pr-10');
+
+            const icon = btn.querySelector('.toggle-icon');
+            btn.classList.add('transition-opacity', 'duration-150');
+
+            const show = () => btn.classList.remove('invisible');
+            const hide = () => {
+                btn.classList.add('invisible');
+                if (icon) {
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                }
+                input.type = 'password';
+            };
+
+            const update = () => {
+                if (input.value && input.value.length > 0) show();
+                else {
+                    if (document.activeElement === input) show();
+                    else hide();
+                }
+            };
+
+            // Initialize (handle autofill by checking shortly after load)
+            update();
+            setTimeout(update, 200);
+
+            // Events
+            input.addEventListener('input', update);
+            input.addEventListener('change', update);
+            input.addEventListener('focus', update);
+            input.addEventListener('blur', () => { if (!input.value) hide(); });
+
+            // Prevent blur when clicking the button
+            btn.addEventListener('mousedown', e => e.preventDefault());
+
+            btn.addEventListener('click', () => {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+                } else {
+                    input.type = 'password';
+                    if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                }
+                input.focus();
+            });
+
+            // In case a password manager autofills later (some browsers), observe attribute changes
+            if ('MutationObserver' in window) {
+                const mo = new MutationObserver(() => update());
+                mo.observe(input, { attributes: true, attributeFilter: ['value'] });
+            }
+        });
+    });
+    </script>
+
+    <!-- Password strength & match script (register page) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const pw = document.querySelector('input[name="password1"]');
+        const pw2 = document.querySelector('input[name="password2"]');
+        const strength = document.getElementById('password-strength');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+        const matchText = document.getElementById('password-match');
+
+        function scorePassword(s) {
+            let score = 0;
+            if (!s) return 0;
+            // length
+            if (s.length >= 8) score += 1;
+            if (s.length >= 12) score += 1;
+            // variety
+            if (/[a-z]/.test(s) && /[A-Z]/.test(s)) score += 1;
+            if (/\d/.test(s) && /[^A-Za-z0-9]/.test(s)) score += 1;
+            return score; // 0-4
+        }
+
+        function updateStrength() {
+            if (!pw) return;
+            const val = pw.value || '';
+            if (!val) {
+                strength && strength.classList.add('hidden');
+                return;
+            }
+            strength && strength.classList.remove('hidden');
+            const score = scorePassword(val);
+            const pct = (score / 4) * 100;
+            if (strengthBar) {
+                strengthBar.style.width = pct + '%';
+                // color
+                if (score <= 1) { strengthBar.className = 'h-full w-full bg-red-500 transition-all duration-200'; strengthText.innerText = 'Weak'; }
+                else if (score === 2) { strengthBar.className = 'h-full w-full bg-yellow-400 transition-all duration-200'; strengthText.innerText = 'Fair'; }
+                else if (score === 3) { strengthBar.className = 'h-full w-full bg-green-400 transition-all duration-200'; strengthText.innerText = 'Good'; }
+                else { strengthBar.className = 'h-full w-full bg-green-600 transition-all duration-200'; strengthText.innerText = 'Strong'; }
+            }
+            updateMatch();
+        }
+
+        function updateMatch() {
+            if (!matchText) return;
+            if (!pw || !pw2) return;
+            if (!pw2.value) { matchText.classList.add('hidden'); return; }
+            matchText.classList.remove('hidden');
+            if (pw.value === pw2.value) {
+                matchText.innerText = 'Passwords match';
+                matchText.classList.remove('text-red-600');
+                matchText.classList.add('text-green-600');
+            } else {
+                matchText.innerText = "Passwords don't match";
+                matchText.classList.remove('text-green-600');
+                matchText.classList.add('text-red-600');
+            }
+        }
+
+        if (pw) {
+            pw.addEventListener('input', updateStrength);
+            pw.addEventListener('blur', updateStrength);
+        }
+        if (pw2) {
+            pw2.addEventListener('input', updateMatch);
+            pw2.addEventListener('blur', updateMatch);
+        }
+
+        // initialize on load in case of autofill
+        setTimeout(() => { updateStrength(); updateMatch(); }, 300);
+    });
     </script>
 </body>
 

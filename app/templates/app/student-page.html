@@ -20,32 +20,116 @@ Student Page
         <div class="flex flex-col md:flex-row items-center md:items-end p-6 -mt-12 md:-mt-16">
             <!-- Avatar -->
             <div class="avatar">
-                <div class="w-28 md:w-36 rounded-full ring ring-base-100 ring-offset-base-100 ring-offset-2">
-                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" alt="Student Profile">
+                <div class="w-28 md:w-36 rounded-full ring ring-base-100 ring-offset-base-100 ring-offset-2 overflow-hidden bg-primary text-white flex items-center justify-center text-2xl">
+                    {% if student.profile_pic %}
+                    <img src="{{ student.profile_pic.url }}" alt="{{ student.get_full_name }}">
+                    {% else %}
+                    {{ student.first_name|default:student.username|slice:":1"|upper }}{{ student.last_name|default:""|slice:":1"|upper }}
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Details -->
             <div class="mt-4 md:mt-0 md:ml-6 text-center md:text-left">
-                <h1 class="text-2xl md:text-3xl font-bold">John Doe</h1>
-                <p class="text-sm md:text-base text-base-content/70">Roll No: 2023-045 | Computer Science</p>
-                <p class="text-sm md:text-base text-base-content/70">Semester: 5 | Email: john.doe@example.com</p>
+                <h1 class="text-2xl md:text-3xl font-bold">{{ student.get_full_name }}</h1>
+                <p class="text-sm md:text-base text-base-content/70">Grade: {{ student.grade.name|default:'-' }}</p>
+                <p class="text-sm md:text-base text-base-content/70">Email: {{ student.email }}</p>
+                <p class="text-sm md:text-base text-base-content/70">Phone: {{ student.phone_number|default:'-' }}</p>
             </div>
         </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
-
-        <a href="{% url 'payment:transactions' %}" class="btn btn-primary btn-wide">
-            💳 View Fee Payments
-        </a>
-        <a href="{% url 'payment:due_payments' %}" class="btn btn-accent btn-wide">
-            ⚠️ Check Due Payments
-        </a>
+    <!-- Summary Cards -->
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="p-4 bg-base-100 rounded-lg shadow">
+            <div class="text-sm text-gray-500">Total Fees (Yearly)</div>
+            <div class="text-xl font-bold">Rs. {{ fee_info.grand_total|default:'0.00' }}</div>
+        </div>
+        <div class="p-4 bg-base-100 rounded-lg shadow">
+            <div class="text-sm text-gray-500">Total Paid</div>
+            <div class="text-xl font-bold">Rs. {{ total_paid|floatformat:2 }}</div>
+        </div>
+        <div class="p-4 bg-base-100 rounded-lg shadow">
+            <div class="text-sm text-gray-500">Due Amount</div>
+            <div class="text-xl font-bold text-error">Rs. {{ due_amount|default:'0.00' }}</div>
+        </div>
+        <div class="p-4 bg-base-100 rounded-lg shadow flex flex-col justify-between">
+            <div>
+                <div class="text-sm text-gray-500">Recent Payments</div>
+                <div class="text-xl font-bold">{{ recent_payments|length }}</div>
+            </div>
+            <div class="mt-2">
+                <a href="{% url 'payment:transactions' %}" class="text-sm text-blue-500">View all</a>
+            </div>
+        </div>
     </div>
-    <a class="btn btn-outline btn-sm w-full mb-3" href="{% url 'accounts:logout_view' %}">
-        Logout
-    </a>
+
+    <!-- Fee Structure (toggle) -->
+    <div class="mt-6 bg-base-200 rounded-lg shadow p-4">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="font-semibold">Fee Structure</h3>
+            {% if fee_info %}
+            <button id="toggle-fee-structure" class="btn btn-sm btn-ghost">Show</button>
+            {% endif %}
+        </div>
+        {% if fee_info %}
+        <pre id="fee-structure" class="text-sm text-gray-700 whitespace-pre-wrap hidden bg-base-100 p-3 rounded">{{ fee_info.fee_structure_description }}</pre>
+        {% else %}
+        <p class="text-sm text-gray-500">No fee information available for your grade.</p>
+        {% endif %}
+    </div>
+
+    <!-- Recent Payments List -->
+    <div class="mt-6 bg-base-200 rounded-lg shadow p-4">
+        <h3 class="font-semibold mb-2">Recent Payments</h3>
+        {% if recent_payments %}
+        <ul class="space-y-2">
+            {% for tx in recent_payments %}
+            <li class="flex items-center justify-between p-2 bg-base-100 rounded">
+                <div>
+                    <div class="font-medium">{{ tx.name }} - Rs. {{ tx.amount }}</div>
+                    <div class="text-xs text-gray-500">{{ tx.gateway }} • {{ tx.get_status_display }} • {{ tx.updated_at|date:'M d, Y H:i' }}</div>
+                </div>
+                <div>
+                    {% if tx.status == 'SUCCESS' %}
+                    <span class="badge badge-success">Paid</span>
+                    {% elif tx.status == 'FAILED' %}
+                    <span class="badge badge-error">Failed</span>
+                    {% else %}
+                    <span class="badge">{{ tx.status }}</span>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-gray-500">No payments yet. Use the button below to pay due fees.</p>
+        {% endif %}
+
+        <div class="mt-4 flex gap-4 items-center">
+            <a href="{% url 'payment:transactions' %}" class="btn btn-outline">View Payments</a>
+            <a href="{% url 'payment:due_payments' %}" class="btn btn-primary">Pay Due</a>
+        </div>
+    </div>
+
+    <a class="btn btn-outline btn-sm w-full mt-4" href="{% url 'accounts:logout_view' %}">Logout</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('toggle-fee-structure');
+        const pre = document.getElementById('fee-structure');
+        if (toggle && pre) {
+            toggle.addEventListener('click', () => {
+                if (pre.classList.contains('hidden')) {
+                    pre.classList.remove('hidden');
+                    toggle.innerText = 'Hide';
+                } else {
+                    pre.classList.add('hidden');
+                    toggle.innerText = 'Show';
+                }
+            });
+        }
+    });
+</script>
 </div>
 {% endblock %}

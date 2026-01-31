@@ -233,6 +233,7 @@ def students(request):
         "csv_form": csv_form,
         "filter_form": filtered_students.form,
         "page_obj": page_obj,
+        "total_students": filtered_students.qs.count(),
     }
 
     return render(request, "school/students.html", context)
