@@ -42,3 +42,24 @@ python manage.py tailwind dev
 # Fee Management System Image
 
 ![Fee Management System](theme/static/images/fmsfinal.png)
+![Login](Screenshots/login.png)
+![Register](Screenshots/register.png)
+![Dashboards](Screenshots/dashboard.png)![Dashboard](Screenshots/dashboard2.png)
+![Classes](Screenshots/classes.png)
+![Fees](Screenshots/Fees.png)
+![Students](Screenshots/students.png)
+![AdminProfile](Screenshots/profileadmin.png)
+![StudentProfile](Screenshots/studentProfile.png)
+![Payments](Screenshots/paydue.png)
+![Payments](Screenshots/makepayment.png)
+![Payments](Screenshots/gateway.png)
+![Payments](Screenshots/esewa.png)
+![Payments](Screenshots/esewa2.png)
+![Payments](Screenshots/esewa3.png)
+![Payments](Screenshots/khalti.png)
+![Payments](Screenshots/khalti2.png)
+
+
+
+
+
