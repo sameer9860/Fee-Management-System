@@ -9,6 +9,8 @@ from payment.models import Payment
 from django.contrib import messages
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 
 def transactions(request):
@@ -169,26 +171,40 @@ def payment_done(request):
     return redirect("payment:transactions")
 
 
+
+# Initiate eSewa Payment
 @require_POST
 def payment_esewa(request):
     payment_id = request.POST.get("payment_id")
     payment = get_object_or_404(Payment, id=payment_id, student=request.user)
+
     payment.gateway = Payment.Gateway.ESEWA
     payment.save()
 
     context = {
         "payment": payment,
-        "esewa_url": settings.ESEWA_BASE_URL,   # uat.esewa.com.np/epay/main
+        "esewa_url": settings.ESEWA_BASE_URL + "/epay/main",  # Sandbox: rc.esewa.com.np/epay/main
         "merchant_code": settings.ESEWA_MERCHANT_CODE,
         "success_url": request.build_absolute_uri(reverse("payment:esewa_verify")),
         "failure_url": request.build_absolute_uri(reverse("payment:due_payments")),
     }
+
     return render(request, "payment/esewa_redirect.html", context)
 
+
+# eSewa Callback Verification
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
 def esewa_verify(request):
-    oid = request.GET.get("oid")  # our Payment.id
-    amt = request.GET.get("amt")
-    refId = request.GET.get("refId")
+    data = request.POST if request.method == "POST" else request.GET
+
+    oid = data.get("oid")      # Payment.id (pid)
+    amt = data.get("amt")
+    refId = data.get("refId")
+
+    if not oid or not refId:
+        messages.error(request, "Invalid eSewa response")
+        return redirect("payment:due_payments")
 
     try:
         payment = Payment.objects.get(id=oid, gateway=Payment.Gateway.ESEWA)
@@ -196,6 +212,7 @@ def esewa_verify(request):
         messages.error(request, "Payment not found")
         return redirect("payment:due_payments")
 
+    # 🔎 Verify with eSewa server
     payload = {
         "amt": amt,
         "scd": settings.ESEWA_MERCHANT_CODE,

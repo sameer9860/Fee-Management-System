@@ -64,7 +64,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'project.urls'
 TAILWIND_APP_NAME = 'theme'
-NPM_BIN_PATH = '/usr/local/bin/npm'
+# NPM_BIN_PATH = '/usr/local/bin/npm'
 
 TEMPLATES = [
     {
@@ -180,8 +180,16 @@ ESEWA_VERIFY_URL = config("ESEWA_VERIFY_URL")
 # Sandbox merchant code
 ESEWA_MERCHANT_CODE = config("ESEWA_MERCHANT_CODE")
 
+# Sandbox payment URL
+ESEWA_PAYMENT_URL = config("ESEWA_PAYMENT_URL")
+
 
 # eSewa Live (Production)
 # ESEWA_BASE_URL = "https://esewa.com.np/epay/main"
 # ESEWA_STATUS_URL = "https://esewa.com.np/api/epay/transaction/status/"
 # ESEWA_MERCHANT_CODE = "EPAYLIVE"  # or your live merchant code
+
+# ESEWA_BASE_URL=https://rc.esewa.com.np
+# ESEWA_PAYMENT_URL=https://rc.esewa.com.np/epay/main
+# ESEWA_VERIFY_URL=https://rc.esewa.com.np/epay/transrec
+# ESEWA_MERCHANT_CODE=EPAYTEST
